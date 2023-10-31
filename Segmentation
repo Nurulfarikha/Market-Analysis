@@ -1,0 +1,78 @@
+library(readxl)
+data<-read_excel("D:/KULIAH/latihan/VIX/Online Retail.xlsx")
+head(data)
+write.table(data,file = "Online Retail.csv")
+#Load Data
+data<-read.csv("Online Retail.csv")
+
+#Cleaning data
+library(dplyr)
+data<-data%>%
+  mutate(Quantity=replace(Quantity,Quantity<=0,NA),
+         UnitPrice=replace(UnitPrice,UnitPrice<=0,NA))
+#Check the existence of NA
+colSums(is.na(data[,c("Quantity","UnitPrice")]))
+#Delete NA
+data<-data%>%na.omit(data)
+#Change character to factors /& date
+data<-data%>%
+  mutate(InvoiceNo=as.factor(InvoiceNo),
+         StockCode=as.factor(StockCode),
+         InvoiceDate=as.Date(InvoiceDate),
+         CustomerID=as.factor(CustomerID),
+         Country=as.factor(Country))
+str(data)
+#Gross Merchandise Value/Revenue
+data<-data%>%mutate(Revenue=Quantity*UnitPrice)
+
+#RFM Analysis
+max(data$InvoiceDate,na.rm=T)
+library(lubridate)
+date<-as_date('2012-01-01',tz='UTC')
+RFM<-data%>%group_by(CustomerID)%>%
+  summarise(recency=as.numeric(date-max(InvoiceDate)),
+                               frequency=n_distinct(InvoiceNo),
+                               monetary=sum(Revenue))
+summary(RFM)
+#Scoring of RFM
+#R Score
+RFM$recency[RFM$recency<=40]<-4
+RFM$recency[RFM$recency>40&RFM$recency<=73]<-3
+RFM$recency[RFM$recency>73&RFM$recency<=164.8]<-2
+RFM$recency[RFM$recency>164.8]<-1
+
+#F Score
+RFM$frequency[RFM$frequency<=1]<-1
+RFM$frequency[RFM$frequency>1&RFM$frequency<=2]<-2
+RFM$frequency[RFM$frequency>2&RFM$frequency<=5]<-3
+RFM$frequency[RFM$frequency>5]<-4
+#M Score
+RFM$monetary[RFM$monetary<=307.42]<-1
+RFM$monetary[RFM$monetary>307.42&RFM$monetary<=674.48]<-2
+RFM$monetary[RFM$monetary>674.48&RFM$monetary<=1661.74]<-3
+RFM$monetary[RFM$monetary>1661.74]<-4
+#RFM Score
+RFM<-RFM%>%
+  mutate(RFMScore=100*recency+10*frequency+monetary)
+  
+#Customer Segmentation
+RFM$segment<-rep(0,nrow(RFM))
+best <- c(444)
+loyal <- c(334,343,344,433,434,443)
+potential<-c(442,432,423,342,332,333,322,323,324,243,233,234,441,431)
+occasional<-c(142,143,144,132,133,122,123,113)
+big_spender<-c(424,413,414,313,314,244,223,224,213,214,134,124,114)
+look_out <- c(421,422,411,412,341,331,321,311,312)
+lost_cheap<-c(241,242,231,232,221,222,211,212,141,131,121,111,112)
+
+RFM$segment[which(RFM$RFMScore %in% best)]="BEST"
+RFM$segment[which(RFM$RFMScore %in% loyal)]="LOYAL"
+RFM$segment[which(RFM$RFMScore %in% potential)]="POTENTIAL"
+RFM$segment[which(RFM$RFMScore %in% occasional)]="OCCASIONAL"
+RFM$segment[which(RFM$RFMScore %in% big_spender)]="BIG SPENDER"
+RFM$segment[which(RFM$RFMScore %in% look_out)]="LOOK OUT CUST"
+RFM$segment[which(RFM$RFMScore %in% lost_cheap)]="LOST CHEAP CUST"
+
+RFM%>%count(segment)%>%
+  arrange(desc(n))%>%
+  rename(segmentRFM=segment,count=n)
