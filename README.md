@@ -12,4 +12,7 @@ RFM analysis can enhance eCommerce sales by leveraging recency, frequency, and m
 
 RFM Segmentation can be applied to all your customers or a specific subset. For instance, you might initially segment customers based on location or other demographic factors, and then apply RFM to these segments for further historical, transaction-based segmentation.
 
+This is **Market Segmentation Dashboard** on my Tableau Public 
+https://public.tableau.com/app/profile/nurul5544/viz/CustomerAnalysis_16939788393310/MarketSegmentation?publish=yes
+
 ![tableau online retail](https://github.com/Nurulfarikha/Market-Analysis/assets/112846466/b6a51b6a-82dd-41c6-a715-69d2e4b92b25)
