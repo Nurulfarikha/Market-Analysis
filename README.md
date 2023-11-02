@@ -1,5 +1,5 @@
 # Market-Analysis
-**Market Segmentation**
+**Market Segmentation using RFM Analysis**
 
 RFM (Recency, Frequency, Monetary) analysis is a recognized method in marketing for segmenting customers based on their behavior. It categorizes customers according to their buying history – the recency, frequency, and monetary value of their purchases.
 
